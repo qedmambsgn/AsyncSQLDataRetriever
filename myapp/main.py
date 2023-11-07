@@ -3,6 +3,7 @@ from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
 from sqlalchemy.orm import sessionmaker
 from myapp.mymodels import Base, Data1, Data2, Data3
 from sqlalchemy import select
+import asyncio
 
 app = FastAPI()
 
@@ -62,9 +63,11 @@ async def get_data_from_table(table: Base, session: Session):
 async def get_data():
     """GET Endpoint to get data from all tables; Sort result by ID"""
     async with Session() as session:
-        data1 = await get_data_from_table(Data1, session)
-        data2 = await get_data_from_table(Data2, session)
-        data3 = await get_data_from_table(Data3, session)
+        data1, data2, data3 = await asyncio.gather(
+            get_data_from_table(Data1, session),
+            get_data_from_table(Data2, session),
+            get_data_from_table(Data3, session)
+        )
 
         await session.commit()
 
